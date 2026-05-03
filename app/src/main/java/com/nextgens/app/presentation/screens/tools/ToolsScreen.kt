@@ -16,14 +16,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Activity
+import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Power
+import androidx.compose.material.icons.outlined.PowerSettingsNew
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material.icons.outlined.Wifi
-import androidx.compose.material.icons.outlined.Zap
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -44,12 +44,12 @@ data class NetworkTool(val id: String, val name: String, val description: String
 val TOOLS_LIST = listOf(
     NetworkTool("adblock", "Ad-blocker", "Block intrusive ads globally", Icons.Outlined.Shield),
     NetworkTool("firewall", "Firewall", "Per-app network control", Icons.Outlined.Lock),
-    NetworkTool("speedtest", "Speed Test", "Benchmark connection", Icons.Outlined.Zap),
+    NetworkTool("speedtest", "Speed Test", "Benchmark connection", Icons.Outlined.Bolt),
     NetworkTool("wifi", "Wi-Fi Analyzer", "Channel & signal scan", Icons.Outlined.Wifi),
-    NetworkTool("packet", "Packet Capture", "Analyze raw traffic", Icons.Outlined.Activity),
+    NetworkTool("packet", "Packet Capture", "Analyze raw traffic", Icons.Outlined.Analytics),
     NetworkTool("ssh", "SSH Tunnel", "Secure remote access", Icons.Outlined.Terminal),
     NetworkTool("dns", "DNS Analytics", "Detailed DNS lookup logs", Icons.Outlined.Search),
-    NetworkTool("usage", "Data Usage", "Monitor app consumption", Icons.Outlined.Power),
+    NetworkTool("usage", "Data Usage", "Monitor app consumption", Icons.Outlined.PowerSettingsNew),
 )
 
 @Composable

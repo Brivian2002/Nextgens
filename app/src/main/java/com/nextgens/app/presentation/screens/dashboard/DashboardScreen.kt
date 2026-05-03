@@ -18,12 +18,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Globe
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.PowerSettingsNew
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material.icons.outlined.Wifi
-import androidx.compose.material.icons.outlined.Zap
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -154,12 +154,12 @@ fun VpnButtonSection() {
 fun QuickTilesSection() {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         QuickTile(Modifier.weight(1f), "Hotspot", Icons.Outlined.Wifi, Color(0xFFE3F2FD), Color(0xFF1E88E5))
-        QuickTile(Modifier.weight(1f), "Mesh", Icons.Outlined.Smartphone, Color(0xFFE8EAF6), Color(0xFF3F51B5))
+        QuickTile(Modifier.weight(1f), "Mesh", Icons.Outlined.PhoneAndroid, Color(0xFFE8EAF6), Color(0xFF3F51B5))
     }
     Spacer(modifier = Modifier.height(12.dp))
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        QuickTile(Modifier.weight(1f), "Global Share", Icons.Outlined.Globe, Color(0xFFE0F7FA), Color(0xFF00BCD4))
-        QuickTile(Modifier.weight(1f), "4G Lite", Icons.Outlined.Zap, Color(0xFFFFF8E1), Color(0xFFFFA000))
+        QuickTile(Modifier.weight(1f), "Global Share", Icons.Outlined.Public, Color(0xFFE0F7FA), Color(0xFF00BCD4))
+        QuickTile(Modifier.weight(1f), "4G Lite", Icons.Outlined.Bolt, Color(0xFFFFF8E1), Color(0xFFFFA000))
     }
 }
 

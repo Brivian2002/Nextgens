@@ -19,7 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material3.Button
@@ -133,7 +133,7 @@ fun CodeScreen() {
                 onClick = {},
                 modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFF5F5F5))
             ) {
-                Icon(Icons.Outlined.DeleteOutline, contentDescription = null, tint = Color.Gray)
+                Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color.Gray)
             }
         }
         

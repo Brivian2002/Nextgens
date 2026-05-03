@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Info
@@ -21,7 +23,7 @@ import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -84,7 +86,7 @@ fun SettingsScreen() {
 }
 
 @Composable
-fun SettingSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+fun SettingSection(title: String, content: @Composable ColumnLayoutScope.() -> Unit) {
     Column {
         Text(
             title.uppercase(),
@@ -101,14 +103,15 @@ fun SettingSection(title: String, content: @Composable ColumnScope.() -> Unit) {
             elevation = CardDefaults.cardElevation(2.dp)
         ) {
             Column {
-                content()
+                val scope = ColumnLayoutScopeImpl(this)
+                scope.content()
             }
         }
     }
 }
 
 @Composable
-fun ColumnScope.SettingItem(
+fun SettingItem(
     label: String,
     icon: ImageVector,
     detail: String? = null,
@@ -153,7 +156,18 @@ fun ColumnScope.SettingItem(
     }
 }
 
-interface ColumnScope { // Helper to match typical Compose structure
+interface ColumnLayoutScope {
     @Composable
-    fun HorizontalDivider(modifier: Modifier = Modifier)
+    fun ItemDivider()
+}
+
+class ColumnLayoutScopeImpl(private val columnScope: ColumnScope) : ColumnLayoutScope {
+    @Composable
+    override fun ItemDivider() {
+        Divider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            thickness = 0.5.dp,
+            color = Color.LightGray.copy(alpha = 0.3f)
+        )
+    }
 }

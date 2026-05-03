@@ -3,8 +3,8 @@ package com.nextgens.app.presentation.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.Construction
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -28,7 +28,7 @@ import com.nextgens.app.presentation.screens.settings.SettingsScreen
 
 sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
     object Dashboard : Screen("dashboard", "Dashboard", Icons.Outlined.Home)
-    object Tools : Screen("tools", "Tools", Icons.Outlined.Build)
+    object Tools : Screen("tools", "Tools", Icons.Outlined.Construction)
     object Code : Screen("code", "Code", Icons.Outlined.Code)
     object Settings : Screen("settings", "Settings", Icons.Outlined.Settings)
 }
