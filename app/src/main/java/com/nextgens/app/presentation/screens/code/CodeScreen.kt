@@ -33,7 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -44,7 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun CodeScreen() {
+fun CodeScreen(viewModel: CodeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+    val script by viewModel.script.collectAsState()
+    val consoleOutput by viewModel.consoleOutput.collectAsState()
+    val isExecuting by viewModel.isExecuting.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,15 +92,16 @@ fun CodeScreen() {
                     }
                 }
                 TextField(
-                    value = "echo \"Starting diagnostics...\"\niptables -L\nservice vpn status",
-                    onValueChange = {},
+                    value = script,
+                    onValueChange = { viewModel.updateScript(it) },
                     modifier = Modifier.fillMaxSize(),
                     textStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 12.sp, color = Color(0xFF00BCD4)),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = Color(0xFF00BCD4)
                     )
                 )
             }
@@ -109,6 +117,14 @@ fun CodeScreen() {
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .background(Color(0xFFF5F5F5))
+                        .clickable { 
+                            when(template) {
+                                "Flush DNS" -> viewModel.updateScript("ndc resolver flushdefaultif\nndc resolver flushif wlan0")
+                                "Reset Network" -> viewModel.updateScript("svc wifi disable\nsvc wifi enable")
+                                "Kill Apps" -> viewModel.updateScript("am kill-all")
+                                "Speed Test" -> viewModel.updateScript("ping -c 4 8.8.8.8")
+                            }
+                        }
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(template, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
@@ -120,17 +136,22 @@ fun CodeScreen() {
         
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(
-                onClick = {},
+                onClick = { viewModel.executeScript() },
                 modifier = Modifier.weight(1f).height(48.dp),
+                enabled = !isExecuting,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A237E))
             ) {
-                Icon(Icons.Outlined.PlayArrow, contentDescription = null)
+                if (isExecuting) {
+                    androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                } else {
+                    Icon(Icons.Outlined.PlayArrow, contentDescription = null)
+                }
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("RUN SCRIPT", fontWeight = FontWeight.Bold)
+                Text(if (isExecuting) "EXECUTING..." else "RUN SCRIPT", fontWeight = FontWeight.Bold)
             }
             IconButton(
-                onClick = {},
+                onClick = { viewModel.clearConsole() },
                 modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFF5F5F5))
             ) {
                 Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color.Gray)
@@ -152,10 +173,18 @@ fun CodeScreen() {
                     Text("CONSOLE OUTPUT", color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    item { Text("> Initializing...", color = Color.Green.copy(0.8f), fontFamily = FontFamily.Monospace, fontSize = 11.sp) }
-                    item { Text("> Executing iptables -L", color = Color.Green.copy(0.8f), fontFamily = FontFamily.Monospace, fontSize = 11.sp) }
-                    item { Text("> chain INPUT (policy ACCEPT)", color = Color.Green.copy(0.8f), fontFamily = FontFamily.Monospace, fontSize = 11.sp) }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(consoleOutput) { line ->
+                        Text(
+                            line,
+                            color = if (line.startsWith("$") || line.startsWith(">")) Color.Green.copy(0.7f) else Color.White.copy(0.8f),
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 11.sp
+                        )
+                    }
                 }
             }
         }

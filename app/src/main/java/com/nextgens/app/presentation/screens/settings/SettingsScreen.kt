@@ -30,6 +30,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,6 +61,7 @@ fun SettingsScreen() {
         
         SettingSection("Connectivity") {
             SettingItem("VPN Profiles", Icons.Outlined.Shield, "3 profiles active")
+            ItemDivider()
             SettingItem("Kill Switch", Icons.Outlined.Lock, isToggle = true, initialValue = true)
         }
         
@@ -64,6 +69,7 @@ fun SettingsScreen() {
         
         SettingSection("Features") {
             SettingItem("Hotspot Sharing", Icons.Outlined.Wifi, isToggle = true)
+            ItemDivider()
             SettingItem("Data Optimization", Icons.Outlined.Wifi, "Standard")
         }
         
@@ -118,6 +124,8 @@ fun SettingItem(
     isToggle: Boolean = false,
     initialValue: Boolean = false
 ) {
+    var checked by remember { mutableStateOf(initialValue) }
+    
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,8 +145,8 @@ fun SettingItem(
         Spacer(modifier = Modifier.weight(1f))
         if (isToggle) {
             Switch(
-                checked = initialValue,
-                onCheckedChange = {},
+                checked = checked,
+                onCheckedChange = { checked = it },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = Color(0xFF1A237E)

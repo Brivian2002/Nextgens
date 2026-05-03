@@ -19,10 +19,14 @@ class ForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val clientCount = intent?.getIntExtra("clientCount", 0) ?: 0
+        val speed = intent?.getStringExtra("speed") ?: "0 MB/s"
+        
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Nextgens Active")
-            .setContentText("VPN and Network protection running")
+            .setContentTitle("Nextgens Protected")
+            .setContentText("Clients: $clientCount | Speed: $speed")
             .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setOngoing(true)
             .build()
 
         startForeground(NOTIFICATION_ID, notification)

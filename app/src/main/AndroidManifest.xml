@@ -50,6 +50,10 @@
             android:foregroundServiceType="specialUse"
             android:exported="false" />
 
+        <service
+            android:name=".service.NextgensProxyService"
+            android:exported="false" />
+
     </application>
 
 </manifest>

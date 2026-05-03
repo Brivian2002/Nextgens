@@ -32,6 +32,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,7 +50,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(
+    viewModel: DashboardViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    globalShareViewModel: GlobalShareViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
+    val vpnState by viewModel.vpnState.collectAsState()
+    val isVpnActive by viewModel.isVpnActive.collectAsState()
+    val hotspotIp by viewModel.hotspotIp.collectAsState()
+
+    var showGlobalShareDialog by remember { mutableStateOf(false) }
+
+    if (showGlobalShareDialog) {
+        GlobalShareDialog(globalShareViewModel) {
+            showGlobalShareDialog = false
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -54,25 +74,25 @@ fun DashboardScreen() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            HeaderSection()
+            HeaderSection(isVpnActive || vpnState == VpnState.CONNECTED)
         }
         item {
-            VpnButtonSection()
+            VpnButtonSection(vpnState) { viewModel.toggleVpn() }
         }
         item {
-            QuickTilesSection()
+            QuickTilesSection(onGlobalShareClick = { showGlobalShareDialog = true })
         }
         item {
             LiveSpeedGraphSection()
         }
         item {
-            NetworkDetailsSection()
+            NetworkDetailsSection(hotspotIp)
         }
     }
 }
 
 @Composable
-fun HeaderSection() {
+fun HeaderSection(isConnected: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -94,7 +114,7 @@ fun HeaderSection() {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(50))
-                .background(Color(0xFFF5F5F5))
+                .background(if (isConnected) Color(0xFFE8F5E9) else Color(0xFFF5F5F5))
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -102,30 +122,49 @@ fun HeaderSection() {
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(Color.Gray)
+                        .background(if (isConnected) Color(0xFF4CAF50) else Color.Gray)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Disconnected", style = MaterialTheme.typography.labelSmall)
+                Text(
+                    if (isConnected) "Protected" else "Disconnected",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isConnected) Color(0xFF2E7D32) else Color.Unspecified
+                )
             }
         }
     }
 }
 
 @Composable
-fun VpnButtonSection() {
+fun VpnButtonSection(state: VpnState, onToggle: () -> Unit) {
+    val isConnected = state == VpnState.CONNECTED
+    val isConnecting = state == VpnState.CONNECTING
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp),
+            .height(220.dp),
         contentAlignment = Alignment.Center
     ) {
+        // Animation ring
+        if (isConnected || isConnecting) {
+            Box(
+                modifier = Modifier
+                    .size(190.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF1A237E).copy(alpha = 0.1f))
+            )
+        }
+
         Card(
             shape = CircleShape,
             modifier = Modifier
                 .size(160.dp)
-                .clickable { /* Toggle VPN */ },
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
-            elevation = CardDefaults.cardElevation(4.dp)
+                .clickable { onToggle() },
+            colors = CardDefaults.cardColors(
+                containerColor = if (isConnected) Color(0xFF1A237E) else Color(0xFFF5F5F5)
+            ),
+            elevation = CardDefaults.cardElevation(if (isConnected) 8.dp else 2.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -136,14 +175,14 @@ fun VpnButtonSection() {
                     Icons.Outlined.PowerSettingsNew,
                     contentDescription = null,
                     modifier = Modifier.size(56.dp),
-                    tint = Color.Gray
+                    tint = if (isConnected) Color.White else Color.Gray
                 )
                 Text(
-                    "CONNECT",
+                    if (isConnecting) "CONNECTING..." else if (isConnected) "CONNECTED" else "CONNECT",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Black,
-                    letterSpacing = 2.sp,
-                    color = Color.Gray
+                    letterSpacing = 1.sp,
+                    color = if (isConnected) Color.White else Color.Gray
                 )
             }
         }
@@ -151,22 +190,22 @@ fun VpnButtonSection() {
 }
 
 @Composable
-fun QuickTilesSection() {
+fun QuickTilesSection(onGlobalShareClick: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         QuickTile(Modifier.weight(1f), "Hotspot", Icons.Outlined.Wifi, Color(0xFFE3F2FD), Color(0xFF1E88E5))
         QuickTile(Modifier.weight(1f), "Mesh", Icons.Outlined.PhoneAndroid, Color(0xFFE8EAF6), Color(0xFF3F51B5))
     }
     Spacer(modifier = Modifier.height(12.dp))
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        QuickTile(Modifier.weight(1f), "Global Share", Icons.Outlined.Public, Color(0xFFE0F7FA), Color(0xFF00BCD4))
+        QuickTile(Modifier.weight(1f), "Global Share", Icons.Outlined.Public, Color(0xFFE0F7FA), Color(0xFF00BCD4), onClick = onGlobalShareClick)
         QuickTile(Modifier.weight(1f), "4G Lite", Icons.Outlined.Bolt, Color(0xFFFFF8E1), Color(0xFFFFA000))
     }
 }
 
 @Composable
-fun QuickTile(modifier: Modifier, label: String, icon: ImageVector, bgColor: Color, iconColor: Color) {
+fun QuickTile(modifier: Modifier, label: String, icon: ImageVector, bgColor: Color, iconColor: Color, onClick: () -> Unit = {}) {
     Card(
-        modifier = modifier,
+        modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -199,12 +238,25 @@ fun LiveSpeedGraphSection() {
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Live Network Speed", fontWeight = FontWeight.Bold)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Live Network Speed", fontWeight = FontWeight.Bold)
+                Text("4.2 MB/s", style = MaterialTheme.typography.labelSmall, color = Color(0xFF1A237E))
+            }
             Spacer(modifier = Modifier.height(16.dp))
-            Canvas(modifier = Modifier.fillMaxWidth().height(120.dp)) {
+            Canvas(modifier = Modifier.fillMaxWidth().height(100.dp)) {
                 val path = Path().apply {
                     moveTo(0f, size.height * 0.8f)
-                    cubicTo(size.width * 0.3f, size.height * 0.7f, size.width * 0.7f, size.height * 0.4f, size.width, size.height * 0.5f)
+                    val step = size.width / 10
+                    lineTo(step * 1, size.height * 0.7f)
+                    lineTo(step * 2, size.height * 0.9f)
+                    lineTo(step * 3, size.height * 0.6f)
+                    lineTo(step * 4, size.height * 0.65f)
+                    lineTo(step * 5, size.height * 0.4f)
+                    lineTo(step * 6, size.height * 0.55f)
+                    lineTo(step * 7, size.height * 0.3f)
+                    lineTo(step * 8, size.height * 0.45f)
+                    lineTo(step * 9, size.height * 0.2f)
+                    lineTo(size.width, size.height * 0.35f)
                 }
                 drawPath(path, Color(0xFF1A237E), style = Stroke(width = 2.dp.toPx()))
                 // Draw shaded area
@@ -221,7 +273,7 @@ fun LiveSpeedGraphSection() {
 }
 
 @Composable
-fun NetworkDetailsSection() {
+fun NetworkDetailsSection(hotspotIp: String?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -234,15 +286,14 @@ fun NetworkDetailsSection() {
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text("Current Network", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text("Nextgens_Secure_Wifi", fontWeight = FontWeight.Bold)
+                    Text("Nextgens_Secure_Vpn", fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Icon(Icons.Outlined.Refresh, contentDescription = null, tint = Color.Gray)
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-                NetworkDetailItem(Modifier.weight(1f), "IP Address", "192.168.1.15")
-                NetworkDetailItem(Modifier.weight(1f), "Signal Strength", "Excellent")
+                NetworkDetailItem(Modifier.weight(1f), "Hotspot IP", hotspotIp ?: "Inactive")
+                NetworkDetailItem(Modifier.weight(1f), "Clients", "0")
             }
             Spacer(modifier = Modifier.height(24.dp))
             Button(
@@ -251,7 +302,7 @@ fun NetworkDetailsSection() {
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A237E).copy(alpha = 0.05f))
             ) {
-                Text("SCAN NEARBY NETWORKS", color = Color(0xFF1A237E), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text("COPY PROXY SETTINGS", color = Color(0xFF1A237E), fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
